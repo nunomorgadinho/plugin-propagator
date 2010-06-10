@@ -168,7 +168,7 @@ function propagate($new_value)
 				$ch = curl_init();
 				$curl_url = $curl_url."&plugin_action=activated&plugin_mainfile=".$plugin_file;
 		
-				echo "url ".$curl_url."<br/>";
+				//echo "url ".$curl_url."<br/>";
 				
 				curl_setopt($ch, CURLOPT_URL, $curl_url);
 	
