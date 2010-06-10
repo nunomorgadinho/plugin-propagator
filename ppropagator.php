@@ -21,8 +21,7 @@ require_once ( ABSPATH . '/wp-admin/includes/plugin.php' );
 //need the file with the Configuration details
 require_once(ABSPATH . '/wp-content/plugins/blitztools-plugin/blitztools_config.php');
 
-define(ROOT,'http://staging.opentipi.com');
-//define(ROOT,'http://blitzchiroblogs.com');
+define(ROOT,'http://blitzchiroblogs.com');
 
 $temp_active_plugins = (array)get_option('active_plugins');
 
@@ -93,7 +92,8 @@ function unZip($zip_file)
 	$zip = new ZipArchive();
 	$zip->open($zip_file);
 	
-	$destination = substr($zip_file,0,strpos($zip_file,".zip"));
+	$destination = 	substr($zip_file,0,strpos($zip_file,".zip"));
+
 	$zip->extractTo($destination);
 	
 	$zip->close();
@@ -143,11 +143,23 @@ function propagate($new_value)
 			//contains the dir name of the plugin activated/deactivate
 			$plugin_file = plugin_basename(trim($current_plugin));
 			$dirname = dirname($plugin_file);
-			$plugin_dir = WP_PLUGIN_DIR."/".$dirname;
 			
-			
-			$zip_file = WP_PLUGIN_DIR."/".$dirname.".zip";
-	
+
+			//plugins can be distributed as a single file or as a directory
+			if($dirname == '.')
+			{
+				$plugin_dir = WP_PLUGIN_DIR."/".$plugin_file;		
+				$plugin_name = 	substr($plugin_file,0,strpos($plugin_file,".php"));	
+				$zip_file = WP_PLUGIN_DIR."/".$plugin_name.".zip";
+				$plugin_file = $plugin_name.'/'.$plugin_file;  
+				//this is needed to construct well the zip and the url
+			}
+			else		
+			{
+				$plugin_dir = WP_PLUGIN_DIR."/".$dirname;
+				$zip_file = WP_PLUGIN_DIR."/".$dirname.".zip";
+			}
+					
 			//creates the zip archive and if success proceed with the request
 			if($plugin_activated && Zip($plugin_dir,$zip_file))
 			{	
@@ -156,7 +168,7 @@ function propagate($new_value)
 				$ch = curl_init();
 				$curl_url = $curl_url."&plugin_action=activated&plugin_mainfile=".$plugin_file;
 		
-			//	echo "url ".$curl_url."<br/>";
+				echo "url ".$curl_url."<br/>";
 				
 				curl_setopt($ch, CURLOPT_URL, $curl_url);
 	
@@ -172,7 +184,7 @@ function propagate($new_value)
 				$output = curl_exec($ch);
 			
 				curl_close($ch);
-				unlink($zip_file);
+		//		unlink($zip_file);
 				print $output;		
 			}
 			else
