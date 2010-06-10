@@ -184,7 +184,7 @@ function propagate($new_value)
 				$output = curl_exec($ch);
 			
 				curl_close($ch);
-		//		unlink($zip_file);
+				unlink($zip_file);
 				print $output;		
 			}
 			else
